@@ -1,66 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
-import { useState } from "react";
-import db from "./src/config/database";
+import LoginScreen from "./src/screens/LoginScreen";
+import List from "./src/screens/List";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import { useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./src/config/firebaseConfig";
 
-import { ref, set } from "firebase/database";
-import { Button } from "react-native";
+const Stack = createNativeStackNavigator();
 
-// TODO: Delete this code and replace with Formik form and Yup validation in another component file
-export default function App() {
-  const [title, setTitle] = useState("Hello World");
-  const [artist, setArtist] = useState("Adele");
-  const [album, setAlbum] = useState("21");
-  const [year, setYear] = useState("2011");
-
-  function create() {
-    set(ref(db, "songs/" + title), {
-      title: title,
-      artist: artist,
-      album: album,
-      year: year,
-    })
-      .then(() => {
-        alert("Data set.");
-      })
-      .catch((error) => {
-        alert("Error: ", error);
-      });
-  }
-
+const InsideStack = createNativeStackNavigator();
+function InsideLayout() {
   return (
-    <View style={styles.container}>
-      <Text>AddData</Text>
-      <TextInput
-        placeholder="Title"
-        value={title}
-        onChangeText={(text) => setTitle(text)}
-      />
-      <TextInput
-        placeholder="Artist"
-        value={artist}
-        onChangeText={(text) => setArtist(text)}
-      />
-      <TextInput
-        placeholder="Album"
-        value={album}
-        onChangeText={(text) => setAlbum(text)}
-      />
-      <TextInput
-        placeholder="Year"
-        value={year}
-        onChangeText={(text) => setYear(text)}
-      />
-      <Button title="Add" onPress={create} />
-    </View>
+    <InsideStack.Navigator>
+      <InsideStack.Screen name="List" component={List} />
+    </InsideStack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+export default function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      console.log("user" + user);
+      if (user) {
+        setUser(user);
+      }
+    });
+  }, [user]);
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login">
+        {user ? (
+          <Stack.Screen
+            name="List"
+            component={InsideLayout}
+            options={{ headerShown: false }}
+          />
+        ) : (
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
