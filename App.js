@@ -5,8 +5,6 @@ import UserProfile from "./src/screens/UserProfile";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./src/config/firebaseConfig";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,10 +21,9 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      console.log("user" + user);
-      setUser(user);
-    });
+    if (user) {
+      console.log("User is logged in");
+    }
   }, []);
 
   return (
