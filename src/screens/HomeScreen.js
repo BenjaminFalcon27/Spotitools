@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import theme from "../config/theme";
 
@@ -18,15 +25,25 @@ export default function HomeScreen({ navigation }) {
       end={{ x: 0.5, y: 0.6 }}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Bienvenue sur l'application</Text>
-        <Button
-          title="Se connecter"
-          onPress={() => navigation.navigate("Login")}
+        <Image
+          source={require("../../assets/logo.png")}
+          style={{ width: 300, height: 100 }}
         />
-        <Button
-          title="S'inscrire"
-          onPress={() => navigation.navigate("Register")}
-        />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.buttonText}>Se connecter</Text>
+          </TouchableOpacity>
+        </View>
+        {/* add "je n'ai pas encore de compte, Créer un compte" */}
+        <Text style={styles.registerText}>
+          Je n'ai pas encore de compte,{" "}
+          <Text
+            style={styles.registerLink}
+            onPress={() => navigation.navigate("Register")}
+          >
+            Créer un compte
+          </Text>
+        </Text>
       </View>
     </LinearGradient>
   );
@@ -48,5 +65,26 @@ const styles = StyleSheet.create({
     fontSize: theme.sizes.h2,
     marginBottom: 20,
     textAlign: "center",
+  },
+  buttonContainer: {
+    marginVertical: 30,
+    backgroundColor: theme.colors.white,
+    borderRadius: 30,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    overflow: "hidden",
+  },
+  buttonText: {
+    color: theme.colors.black,
+    textAlign: "center",
+  },
+  registerText: {
+    color: theme.colors.white,
+    fontSize: theme.sizes.h6,
+  },
+  registerLink: {
+    color: theme.colors.white,
+    textDecorationLine: "underline",
   },
 });
