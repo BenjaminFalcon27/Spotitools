@@ -34,14 +34,13 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.buttonText}>Se connecter</Text>
           </TouchableOpacity>
         </View>
-        {/* add "je n'ai pas encore de compte, Créer un compte" */}
         <Text style={styles.registerText}>
           Je n'ai pas encore de compte,{" "}
           <Text
             style={styles.registerLink}
             onPress={() => navigation.navigate("Register")}
           >
-            Créer un compte
+            créer un compte
           </Text>
         </Text>
       </View>
