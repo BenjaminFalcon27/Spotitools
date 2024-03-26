@@ -56,32 +56,34 @@ const LoginScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <KeyboardAvoidingView behavior="padding">
-        <TextInput
-          style={styles.input}
-          value={email}
-          placeholder="Email"
-          autoCapitalize="none"
-          onChangeText={(text) => setEmail(text)}
-        ></TextInput>
-        <TextInput
-          style={styles.input}
-          value={password}
-          placeholder="Password"
-          autoCapitalize="none"
-          onChangeText={(text) => setPassword(text)}
-        ></TextInput>
+    // <View style={styles.container}>
+    //   <KeyboardAvoidingView behavior="padding">
+    //     <TextInput
+    //       style={styles.input}
+    //       value={email}
+    //       placeholder="Email"
+    //       autoCapitalize="none"
+    //       onChangeText={(text) => setEmail(text)}
+    //     ></TextInput>
+    //     <TextInput
+    //       style={styles.input}
+    //       value={password}
+    //       placeholder="Password"
+    //       autoCapitalize="none"
+    //       onChangeText={(text) => setPassword(text)}
+    //     ></TextInput>
 
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          <>
-            <Button title="Login" onPress={login} />
-            <Button title="Create an account" onPress={signUp} />
-          </>
-        )}
-      </KeyboardAvoidingView>
+    //     {loading ? (
+    //       <ActivityIndicator size="large" color="#0000ff" />
+    //     ) : (
+    //       <>
+    //         <Button title="Login" onPress={login} />
+    //         <Button title="Create an account" onPress={signUp} />
+    //       </>
+    //     )}
+    //   </KeyboardAvoidingView>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text>Login</Text>
     </View>
   );
 };
