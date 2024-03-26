@@ -4,8 +4,8 @@ import {
   Text,
   TextInput,
   StyleSheet,
+  TouchableOpacity,
   ActivityIndicator,
-  Button,
   KeyboardAvoidingView,
 } from "react-native";
 import { auth } from "../config/firebaseConfig";
@@ -13,71 +13,63 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
+import theme from "../config/theme";
+import { useNavigation } from "@react-navigation/native";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const authentication = auth;
+  const navigation = useNavigation();
 
   const login = async () => {
     setLoading(true);
     try {
-      const response = await signInWithEmailAndPassword(
-        authentication,
-        email,
-        password
-      );
-      console.log(response);
+      await signInWithEmailAndPassword(authentication, email, password);
+      alert("Login successful");
     } catch (error) {
-      console.log(error);
       alert("Sign in failed: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const signUp = async () => {
-    setLoading(true);
-    try {
-      const response = await createUserWithEmailAndPassword(
-        authentication,
-        email,
-        password
-      );
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-      alert("Sign up failed: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <KeyboardAvoidingView behavior="padding">
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <Text style={styles.title}>Connexion</Text>
       <TextInput
         style={styles.input}
         value={email}
         placeholder="Email"
+        placeholderTextColor={theme.colors.light}
         autoCapitalize="none"
-        onChangeText={(text) => setEmail(text)}
-      ></TextInput>
+        onChangeText={setEmail}
+      />
       <TextInput
         style={styles.input}
         value={password}
-        placeholder="Password"
+        placeholder="Mot de passe"
+        placeholderTextColor={theme.colors.light}
         autoCapitalize="none"
-        onChangeText={(text) => setPassword(text)}
-      ></TextInput>
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       ) : (
-        <>
-          <Button title="Login" onPress={login} />
-          <Button title="Create an account" onPress={signUp} />
-        </>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={login}>
+            <Text style={styles.buttonText}>Se connecter</Text>
+          </TouchableOpacity>
+          <Text
+            style={styles.registerLink}
+            onPress={() => navigation.navigate("Register")}
+          >
+            Créer un compte
+          </Text>
+        </View>
       )}
     </KeyboardAvoidingView>
   );
@@ -89,13 +81,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    marginHorizontal: 20,
+    padding: 20,
+    backgroundColor: theme.colors.black,
+  },
+  title: {
+    color: theme.colors.white,
+    fontSize: theme.sizes.h2,
+    marginBottom: 20,
+    textAlign: "center",
+    fontWeight: "bold",
   },
   input: {
-    marginVertical: 4,
+    marginVertical: 10,
     height: 50,
     borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 4,
+    borderColor: theme.colors.primary,
+    color: theme.colors.white,
+    borderRadius: 25,
+    paddingLeft: 15,
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: theme.colors.white,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: theme.colors.black,
+    fontSize: theme.sizes.body,
+  },
+  registerLink: {
+    color: theme.colors.primary,
+    textDecorationLine: "underline",
+    textAlign: "center",
   },
 });
