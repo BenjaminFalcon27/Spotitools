@@ -5,6 +5,7 @@ const theme = {
     white: "#fff",
     light: "#b3b3b3",
     black: "#191414",
+    dark: "#121212",
   },
   fonts: {
     regular: "sans-serif",
