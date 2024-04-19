@@ -15,9 +15,11 @@
     "expo": "~50.0.6",
     "expo-camera": "~14.0.4",
     "expo-linear-gradient": "^12.7.2",
+    "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
     "firebase": "^10.8.1",
     "formik": "^2.4.5",
+    "lottie-react-native": "^6.7.0",
     "react": "18.2.0",
     "react-native": "0.73.2"
   },
