@@ -6,6 +6,7 @@ const theme = {
     light: "#b3b3b3",
     black: "#191414",
     dark: "#121212",
+    danger: "#ff0000",
   },
   fonts: {
     regular: "sans-serif",

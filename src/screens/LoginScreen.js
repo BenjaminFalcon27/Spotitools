@@ -27,10 +27,7 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(authentication, email, password);
-      alert("Sign in successful");
-      navigation.navigate("UserProfile", {
-        currentUser: authentication.currentUser,
-      });
+      navigation.navigate("Feed");
     } catch (error) {
       alert("Sign in failed: " + error.message);
     } finally {
