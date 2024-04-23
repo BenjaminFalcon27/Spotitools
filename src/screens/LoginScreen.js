@@ -27,7 +27,9 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(authentication, email, password);
-      navigation.navigate("Feed");
+      navigation.navigate("Tabs", {
+        screen: "Feed",
+      });
     } catch (error) {
       alert("Sign in failed: " + error.message);
     } finally {
