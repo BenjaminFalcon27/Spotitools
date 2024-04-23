@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function UserProfileScreen(currentUser) {
   const navigation = useNavigation();
-  const email = currentUser.route.params.currentUser.email;
+  const email = "No email";
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
