@@ -12,9 +12,6 @@ import {
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
 
-
-const querystring = require('querystring');
-const path = require('path');
 var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
 var redirect_uri = 'Spotitools://UserProfile';
 
@@ -102,15 +99,17 @@ function connectToSpotify()
   // Définir la portée pour l'autorisation Spotify
   const scope = 'user-read-private user-read-email';
 
+  const queryParams = new URLSearchParams({
+    response_type: 'code',
+    client_id: client_id,
+    scope: scope,
+    redirect_uri: redirect_uri,
+    state: state
+  });
+  const authUrl = `https://accounts.spotify.com/authorize?${queryParams.toString()}`;
+
   // Redirection vers l'URL d'autorisation Spotify avec les paramètres appropriés
-  res.redirect('https://accounts.spotify.com/authorize?' +
-    querystring.stringify({
-      response_type: 'code',
-      client_id: client_id,
-      scope: scope,
-      redirect_uri: redirect_uri,
-      state: state
-    }));
+  res.redirect(authUrl);
 }
 
 function addNewFavorite() {
