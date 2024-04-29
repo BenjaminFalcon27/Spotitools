@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 const querystring = require('querystring');
 const path = require('path');
 var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
-var redirect_uri = 'http://192.168.56.1:8888/';
+var redirect_uri = 'Spotitools://UserProfile';
 
 export default function UserProfileScreen(currentUser) {
   const navigation = useNavigation();
