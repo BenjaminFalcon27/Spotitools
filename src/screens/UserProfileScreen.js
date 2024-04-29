@@ -12,6 +12,12 @@ import {
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
 
+
+const querystring = require('querystring');
+const path = require('path');
+var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
+var redirect_uri = 'http://192.168.56.1:8888/';
+
 export default function UserProfileScreen(currentUser) {
   const navigation = useNavigation();
   const email = "No email";
@@ -25,6 +31,18 @@ export default function UserProfileScreen(currentUser) {
           <Text style={styles.emailTitle}>Email:</Text>
           <Text style={styles.emailText}>{email}</Text>
         </View>
+
+        <ScrollView style={styles.favoriteContainer}>
+          <Text style={styles.favoriteTitle}>ma connexion:</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => connectToSpotify()}
+            >
+              <Text style={styles.buttonText}>ajout de mon compte spotify</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
 
         <ScrollView style={styles.favoriteContainer}>
           <Text style={styles.favoriteTitle}>Mes favoris:</Text>
@@ -64,6 +82,35 @@ export default function UserProfileScreen(currentUser) {
       </View>
     </KeyboardAvoidingView>
   );
+}
+
+// Fonction pour générer une chaîne aléatoire de longueur donnée
+function generateRandomString(length) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+function connectToSpotify()
+{
+  // Générer un état aléatoire
+  const state = generateRandomString(16);
+  // Définir la portée pour l'autorisation Spotify
+  const scope = 'user-read-private user-read-email';
+
+  // Redirection vers l'URL d'autorisation Spotify avec les paramètres appropriés
+  res.redirect('https://accounts.spotify.com/authorize?' +
+    querystring.stringify({
+      response_type: 'code',
+      client_id: client_id,
+      scope: scope,
+      redirect_uri: redirect_uri,
+      state: state
+    }));
 }
 
 function addNewFavorite() {
