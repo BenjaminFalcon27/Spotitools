@@ -1,43 +1,140 @@
-import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import theme from "../config/theme";
+import { db } from "../config/firebaseConfig";
+import { ref, get, child } from "firebase/database";
+import { Audio } from "expo-av";
 
 // Composant pour une publication
-function Post({ user, text, music }) {
+function Post({ trackName, artistName, previewUrl }) {
   return (
     <View style={styles.postContainer}>
-      <Text style={styles.user}>{user}</Text>
-      <Text style={styles.text}>{text}</Text>
-      <Text style={styles.music}>{music}</Text>
+      <Text style={styles.user}>{trackName}</Text>
+      <Text style={styles.text}>{artistName}</Text>
+      <Text style={styles.music}>{previewUrl}</Text>
     </View>
   );
 }
 
 export default function FeedScreen() {
-  // Exemple de données de publication
-  const posts = [
-    {
-      user: "John Doe",
-      text: "Just discovered this amazing song!",
-      music: "Song: Artist - Title",
-    },
-    {
-      user: "Jane Smith",
-      text: "Feeling nostalgic today...",
-      music: "Song: Artist - Title",
-    },
-    // Ajoutez d'autres publications ici...
-  ];
+  const [trackInfo, setTrackInfo] = useState([]);
+  const [sounds, setSounds] = useState([]);
+  const [isPlaying, setIsPlaying] = useState([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(null);
+
+  useEffect(() => {
+    const tracksRef = child(ref(db), "tracks");
+
+    // Fetching data from Firebase
+    get(tracksRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          // Array to store track information
+          const tracks = [];
+          const initialSounds = [];
+          const initialIsPlaying = [];
+          snapshot.forEach((childSnapshot) => {
+            const trackData = childSnapshot.val();
+            if (trackData.items) {
+              trackData.items.forEach((item) => {
+                const track = {
+                  name: item.name,
+                  artist: item.artists[0].name, // Assuming only one artist per track
+                  previewUrl: item.preview_url,
+                };
+                tracks.push(track);
+                initialSounds.push(undefined);
+                initialIsPlaying.push(false);
+              });
+            }
+          });
+          setTrackInfo(tracks);
+          setSounds(initialSounds);
+          setIsPlaying(initialIsPlaying);
+        } else {
+          console.log("No tracks available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (currentTrackIndex !== null) {
+      const sound = sounds[currentTrackIndex];
+      if (sound) {
+        const updatePlaybackStatus = (status) => {
+          if (!status.isPlaying) {
+            const newIsPlaying = [...isPlaying];
+            newIsPlaying[currentTrackIndex] = false;
+            setIsPlaying(newIsPlaying);
+          }
+        };
+        sound.setOnPlaybackStatusUpdate(updatePlaybackStatus);
+      }
+    }
+  }, [currentTrackIndex, isPlaying, sounds]);
+
+  const handleTogglePlayback = async (previewUrl, index) => {
+    if (!isPlaying[index]) {
+      try {
+        // Stop currently playing track, if any
+        if (currentTrackIndex !== null && currentTrackIndex !== index) {
+          await sounds[currentTrackIndex].stopAsync();
+          const newIsPlaying = [...isPlaying];
+          newIsPlaying[currentTrackIndex] = false;
+          setIsPlaying(newIsPlaying);
+        }
+
+        // Start playback for the selected track
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: previewUrl },
+          { shouldPlay: true }
+        );
+        const newSounds = [...sounds];
+        newSounds[index] = sound;
+        setSounds(newSounds);
+        const newIsPlaying = [...isPlaying];
+        newIsPlaying[index] = true;
+        setIsPlaying(newIsPlaying);
+        setCurrentTrackIndex(index);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      // Pause playback if the same track is clicked again
+      await sounds[index].pauseAsync();
+      const newIsPlaying = [...isPlaying];
+      newIsPlaying[index] = false;
+      setIsPlaying(newIsPlaying);
+      setCurrentTrackIndex(null);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
-      {posts.map((post, index) => (
-        <Post
-          key={index}
-          user={post.user}
-          text={post.text}
-          music={post.music}
-        />
+      {trackInfo.map((track, index) => (
+        <View key={index} style={styles.postContainer}>
+          <View style={styles.trackInfo}>
+            <Text style={styles.user}>{track.name}</Text>
+            <Text style={styles.text}>{track.artist}</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => handleTogglePlayback(track.previewUrl, index)}
+            style={styles.playerContainer}
+          >
+            <Text style={styles.playerIcon}>
+              {isPlaying[index] ? "⏸" : "▶️"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       ))}
     </ScrollView>
   );
@@ -56,6 +153,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   user: {
     color: theme.colors.primary,
@@ -71,5 +171,12 @@ const styles = StyleSheet.create({
   music: {
     color: theme.colors.light,
     fontSize: 14,
+  },
+  trackInfo: {
+    flex: 1,
+  },
+  playerIcon: {
+    fontSize: 24,
+    color: "white",
   },
 });
