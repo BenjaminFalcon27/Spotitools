@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,18 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import theme from "../config/theme";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
 
 export default function HomeScreen({ navigation }) {
+  const { isLoggedIn, currentUser } = useAutoLogin();
+
+  if (isLoggedIn) {
+    navigation.navigate("Tabs", {
+      screen: "Feed",
+    });
+  }
+
   return (
     <LinearGradient
       colors={[
@@ -47,6 +57,29 @@ export default function HomeScreen({ navigation }) {
     </LinearGradient>
   );
 }
+
+const useAutoLogin = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        setIsLoggedIn(true);
+        setCurrentUser(user);
+      } else {
+        // User is not signed in
+        setIsLoggedIn(false);
+        setCurrentUser(null);
+      }
+    });
+
+    return unsubscribe;
+  }, []); // Empty dependency array to run only once on component mount
+
+  return { isLoggedIn, currentUser };
+};
 
 const styles = StyleSheet.create({
   container: {

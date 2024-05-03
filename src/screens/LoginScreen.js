@@ -15,6 +15,7 @@ import {
 } from "firebase/auth";
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -22,21 +23,25 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const authentication = auth;
   const navigation = useNavigation();
+  
 
-  const login = async () => {
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(authentication, email, password);
-      navigation.navigate("Tabs", {
-        screen: "Feed",
+  const signin = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log(userCredential.user.uid);
+        navigation.navigate("Tabs", {
+          screen: "UserProfile",
+          params: { user_id: userCredential.user.uid },
+        });
+        // then we want to save the session in the local storage
+        AsyncStorage.setItem("user_id", userCredential.user.uid);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        alert(errorMessage);
       });
-    } catch (error) {
-      alert("Sign in failed: " + error.message);
-    } finally {
-      setLoading(false);
-    }
   };
-
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <Text style={styles.title}>Connexion</Text>
@@ -62,7 +67,7 @@ const LoginScreen = () => {
         <ActivityIndicator size="large" color={theme.colors.primary} />
       ) : (
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={login}>
+          <TouchableOpacity style={styles.button} onPress={signin}>
             <Text style={styles.buttonText}>Se connecter</Text>
           </TouchableOpacity>
           <Text

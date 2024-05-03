@@ -9,21 +9,65 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { auth } from "../config/firebaseConfig";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
+import { setDoc, doc } from "firebase/firestore";
+import { db } from "../config/firebaseConfig";
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
+  const ensurePasswordSecurity = (password) => {
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long");
+      return false;
+    }
+    if (!password.match(/[A-Z]/)) {
+      alert("Password must contain at least one uppercase letter");
+      return false;
+    }
+    if (!password.match(/[a-z]/)) {
+      alert("Password must contain at least one lowercase letter");
+      return false;
+    }
+    if (!password.match(/[0-9]/)) {
+      alert("Password must contain at least one number");
+      return false;
+    }
+    if (!password.match(/[^a-zA-Z0-9]/)) {
+      alert("Password must contain at least one special character");
+      return false;
+    }
+    return true;
+  };
+
   const register = async () => {
+    if (password !== passwordConfirmation) {
+      alert("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      navigation.navigate("Login");
+      const user = auth.currentUser;
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        uid: user.uid,
+        requests: [],
+        friends: [],
+        token: "",
+        avatar: "",
+        name: "",
+      });
+      // then login and redirect to home
+      
+      navigation.navigate("Home");
     } catch (error) {
       alert("Sign up failed: " + error.message);
     } finally {
@@ -51,6 +95,19 @@ const RegisterScreen = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <TextInput
+        style={styles.input}
+        value={passwordConfirmation}
+        placeholder="Confirmer le mot de passe"
+        placeholderTextColor={theme.colors.light}
+        autoCapitalize="none"
+        onChangeText={setPasswordConfirmation}
+        secureTextEntry
+      />
+      <Text style={styles.subtitle}>
+        *Le mot de passe doit contenir au moins 6 caractères, une majuscule, une
+        minuscule, un chiffre et un caractère spécial.
+      </Text>
 
       {loading ? (
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -115,5 +172,10 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     textDecorationLine: "underline",
     textAlign: "center",
+  },
+  subtitle: {
+    color: theme.colors.light,
+    fontSize: theme.sizes.verySmall,
+    marginBottom: 20,
   },
 });

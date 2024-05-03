@@ -8,6 +8,7 @@ import HomeScreen from "../screens/HomeScreen";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import StartSplashScreen from "../screens/StartSplashScreen";
 import FeedScreen from "../screens/FeedScreen";
+import UsersListScreen from "../screens/UsersListScreen";
 import theme from "../config/theme";
 
 const Stack = createStackNavigator();
@@ -42,6 +43,20 @@ function Tabs() {
           ),
         }}
       />
+      <Tab.Screen
+        name="UsersList"
+        component={UsersListScreen}
+        options={{
+          tabBarLabel: "Users",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="account-group"
+              color={color}
+              size={26}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -59,6 +74,7 @@ const StackNavigator = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Tabs" component={Tabs} />
+      <Stack.Screen name="UserProfile" component={UserProfileScreen} />
     </Stack.Navigator>
   );
 };
