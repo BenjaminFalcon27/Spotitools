@@ -15,11 +15,13 @@ import { auth } from "../config/firebaseConfig";
 export default function HomeScreen({ navigation }) {
   const { isLoggedIn, currentUser } = useAutoLogin();
 
-  if (isLoggedIn) {
-    navigation.navigate("Tabs", {
-      screen: "Feed",
-    });
-  }
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigation.navigate("Tabs", {
+        screen: "Feed",
+      });
+    }
+  }, [isLoggedIn, navigation]);
 
   return (
     <LinearGradient

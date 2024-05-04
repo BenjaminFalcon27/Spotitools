@@ -38,7 +38,7 @@ export default function UsersListScreen() {
       <Text style={styles.title}>Liste des utilisateurs</Text>
       <ScrollView style={styles.usersContainer}>
         {users.map((user) => (
-          <TouchableOpacity key={user.id} style={styles.user}>
+          <TouchableOpacity key={user.uid} style={styles.user}>
             <Text style={styles.userText}>{user.email}</Text>
           </TouchableOpacity>
         ))}

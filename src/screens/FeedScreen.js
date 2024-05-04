@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import theme from "../config/theme";
-import { db } from "../config/firebaseConfig";
+import { dbRealtime } from "../config/firebaseConfig";
 import { ref, get, child } from "firebase/database";
 import { Audio } from "expo-av";
 
@@ -29,7 +29,7 @@ export default function FeedScreen() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(null);
 
   useEffect(() => {
-    const tracksRef = child(ref(db), "tracks");
+    const tracksRef = child(ref(dbRealtime), "tracks");
 
     // Fetching data from Firebase
     get(tracksRef)
