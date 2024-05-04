@@ -11,21 +11,33 @@ import {
 } from "react-native";
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
+import { db, auth } from "../config/firebaseConfig";
 
-export default function UserProfileScreen(currentUser) {
+export default function UserProfileScreen(user_id) {
   const navigation = useNavigation();
-  const email = "No email";
+  const currentUser = auth.currentUser;
+
+  const disconnect = () => {
+    auth.signOut();
+    navigation.navigate("Login");
+  }
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <Text style={styles.title}>Mon Profil</Text>
-
+      <View style={styles.userInfosContainer}>
+        <Text style={styles.infosTitle}>Email:</Text>
+        <Text style={styles.infosText}>{currentUser.email}</Text>
+        {/* if user.token is null */}
+        <Text style={styles.infosTitle}>Token:</Text>
+        <Text style={styles.infosText}>
+          Votre token spotify n'est pas valide
+        </Text>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Se connecter à Spotify</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView style={styles.profileContainer}>
-        <View style={styles.header}>
-          <Text style={styles.emailTitle}>Email:</Text>
-          <Text style={styles.emailText}>{email}</Text>
-        </View>
-
         <ScrollView style={styles.favoriteContainer}>
           <Text style={styles.favoriteTitle}>Mes favoris:</Text>
           <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
@@ -51,17 +63,15 @@ export default function UserProfileScreen(currentUser) {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </ScrollView>
-      <View style={styles.disconnectContainer}>
         <View style={styles.disconnectButtonContainer}>
           <TouchableOpacity
             style={styles.buttonDisconnect}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => disconnect()}
           >
             <Text style={styles.buttonText}>Se déconnecter</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -82,11 +92,10 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: theme.colors.black,
     marginTop: 50,
-    height: "100%",
+    height: "80%",
   },
   profileContainer: {
     width: "100%",
-    height: "80%",
     padding: 20,
   },
   title: {
@@ -95,15 +104,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  emailTitle: {
+  userInfosContainer: {
+    padding: 10,
+    width: "100%",
+  },
+  infosTitle: {
     color: theme.colors.white,
     fontSize: 18,
     marginBottom: 5,
+    marginTop: 10,
   },
-  emailText: {
+  infosText: {
     color: theme.colors.light,
     fontSize: 16,
     marginLeft: 10,
+    marginBottom: 10,
   },
   favoriteContainer: {
     marginTop: 20,
@@ -111,7 +126,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
-    height: "10%",
   },
   favoriteTitle: {
     color: theme.colors.white,
@@ -124,7 +138,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   friendsContainer: {
-    height: "10%",
     marginTop: 20,
     borderColor: theme.colors.primary,
     borderWidth: 1,
@@ -158,6 +171,7 @@ const styles = StyleSheet.create({
     width: "80%",
     marginLeft: "auto",
     marginRight: "auto",
+    marginTop: 20,
   },
   input: {
     width: "80%",

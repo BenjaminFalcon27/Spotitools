@@ -13,6 +13,7 @@ const theme = {
     title: "sans-serif-light",
   },
   sizes: {
+    verySmall: 8,
     h1: 32,
     h2: 24,
     h3: 20,
