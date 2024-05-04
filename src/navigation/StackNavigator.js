@@ -9,6 +9,7 @@ import UserProfileScreen from "../screens/UserProfileScreen";
 import StartSplashScreen from "../screens/StartSplashScreen";
 import FeedScreen from "../screens/FeedScreen";
 import UsersListScreen from "../screens/UsersListScreen";
+import TopTracksScreen from "../screens/TopTracksScreen";
 import theme from "../config/theme";
 
 const Stack = createStackNavigator();
@@ -54,6 +55,16 @@ function Tabs() {
               color={color}
               size={26}
             />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="TopTracks"
+        component={TopTracksScreen}
+        options={{
+          tabBarLabel: "Top Tracks",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="music" color={color} size={26} />
           ),
         }}
       />

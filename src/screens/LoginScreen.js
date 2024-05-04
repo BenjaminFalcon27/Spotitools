@@ -23,12 +23,10 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const authentication = auth;
   const navigation = useNavigation();
-  
 
   const signin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        console.log(userCredential.user.uid);
         navigation.navigate("Tabs", {
           screen: "UserProfile",
           params: { user_id: userCredential.user.uid },
