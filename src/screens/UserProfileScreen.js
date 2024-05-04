@@ -20,24 +20,24 @@ export default function UserProfileScreen(user_id) {
   const disconnect = () => {
     auth.signOut();
     navigation.navigate("Login");
-  }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <Text style={styles.title}>Mon Profil</Text>
-      <View style={styles.userInfosContainer}>
-        <Text style={styles.infosTitle}>Email:</Text>
-        <Text style={styles.infosText}>{currentUser.email}</Text>
-        {/* if user.token is null */}
-        <Text style={styles.infosTitle}>Token:</Text>
-        <Text style={styles.infosText}>
-          Votre token spotify n'est pas valide
-        </Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Se connecter à Spotify</Text>
-        </TouchableOpacity>
-      </View>
       <ScrollView style={styles.profileContainer}>
+        <Text style={styles.title}>Mon Profil</Text>
+        <View style={styles.userInfosContainer}>
+          <Text style={styles.infosTitle}>Email:</Text>
+          <Text style={styles.infosText}>{currentUser.email}</Text>
+          {/* if user.token is null */}
+          <Text style={styles.infosTitle}>Token:</Text>
+          <Text style={styles.infosText}>
+            Votre token spotify n'est pas valide
+          </Text>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Se connecter à Spotify</Text>
+          </TouchableOpacity>
+        </View>
         <ScrollView style={styles.favoriteContainer}>
           <Text style={styles.favoriteTitle}>Mes favoris:</Text>
           <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>

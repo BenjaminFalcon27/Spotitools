@@ -16,6 +16,7 @@ import { setDoc, doc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 
 const RegisterScreen = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -61,9 +62,10 @@ const RegisterScreen = () => {
         uid: user.uid,
         requests: [],
         friends: [],
+        likedPosts: [],
         token: "",
         avatar: "",
-        name: "",
+        name: name,
       });
       // then login and redirect to home
       
@@ -78,6 +80,14 @@ const RegisterScreen = () => {
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <Text style={styles.title}>Inscription</Text>
+      <TextInput
+        style={styles.input}
+        value={name}
+        placeholder="Nom"
+        placeholderTextColor={theme.colors.light}
+        autoCapitalize="words"
+        onChangeText={setName}
+      />
       <TextInput
         style={styles.input}
         value={email}
