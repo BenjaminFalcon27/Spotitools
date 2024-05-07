@@ -52,7 +52,7 @@ const StackNavigator = () => {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="Splash"
+      initialRouteName="UserProfile"
     >
       <Stack.Screen name="Splash" component={StartSplashScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />

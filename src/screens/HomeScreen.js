@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import theme from "../config/theme";
+import * as Linking from 'expo-linking';
 
 export default function HomeScreen({ navigation }) {
   return (

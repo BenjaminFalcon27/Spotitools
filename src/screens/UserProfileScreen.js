@@ -11,13 +11,53 @@ import {
 } from "react-native";
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
+import * as WebBrowser from 'expo-web-browser';
+const querystring = require('querystring');
+import 'url-search-params-polyfill';
+import * as Linking from 'expo-linking';
 
-var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
-var redirect_uri = 'Spotitools://UserProfile';
+
 
 export default function UserProfileScreen(currentUser) {
   const navigation = useNavigation();
   const email = "No email";
+  const [isConnected, setIsConnected] = useState(false);
+  const buttonText = isConnected ? 'Connected to Spotify!' : 'ajout de mon compte spotify';
+  var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
+  var scope = 'user-read-private user-read-email';
+  
+  const authorizeWithSpotify = async () => {
+
+    var redirect_uri ='exp://pembne0.anonymous.8081.exp.direct/--/--/spotify-callback'; //Linking.makeUrl('/--/spotify-callback');
+    try {
+      var state = generateRandomString(16);
+      const loginUrl = 'https://accounts.spotify.com/authorize?' +
+      querystring.stringify({
+        response_type: 'code',
+        client_id: client_id,
+        scope: scope,
+        redirect_uri: redirect_uri,
+        state: state
+      });
+  
+      const listener  = Linking.addEventListener("url", ({ url }) => {
+        if (url.startsWith(redirect_uri)) {
+          const urlParams = new URLSearchParams(url.split("?")[1]);
+          const code = urlParams.get("code");
+          const state = urlParams.get("state");
+  
+          console.log("Authorization code:", code);
+          console.log("State:", state);
+  
+          listener.remove; // Remove listener after handling
+          setIsConnected(true);
+        }
+      });
+      await WebBrowser.openAuthSessionAsync(loginUrl);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -34,9 +74,9 @@ export default function UserProfileScreen(currentUser) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => connectToSpotify()}
+              onPress={authorizeWithSpotify}
             >
-              <Text style={styles.buttonText}>ajout de mon compte spotify</Text>
+              <Text style={styles.buttonText}>{buttonText}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -109,7 +149,7 @@ function connectToSpotify()
   const authUrl = `https://accounts.spotify.com/authorize?${queryParams.toString()}`;
 
   // Redirection vers l'URL d'autorisation Spotify avec les paramètres appropriés
-  res.redirect(authUrl);
+  Linking.openURL(authUrl);
 }
 
 function addNewFavorite() {

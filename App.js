@@ -1,38 +1,42 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import StackNavigator from "./src/navigation/StackNavigator";
+import * as Linking from 'expo-linking';
+
 
 export default function App() {
-
-  
-
+  const navigationRef = useRef();
   useEffect(() => {
-    // Ajouter un gestionnaire d'URL pour détecter les liens profonds
-    const handleDeepLink = event => {
+    // Handle deep link when app is running in the background
+    const handleDeepLink = (event) => {
       const { url } = event;
+      console.log('event logt:', url);
       if (url) {
-        // Extraire le chemin de l'URL
-        const path = url.split('//')[1];
-        // Naviguer vers l'écran correspondant au chemin de l'URL
-        if (path === 'spooticonnexion') {
-          // Naviguer vers l'écran DeepLinkScreen si le lien profond est '/deeplink'
+        // const path = url.split("?");
+        // console.log('path:', path[-1]);
+        if (url.startsWith('exp://pembne0-anonymous-8081.exp.direct?UserProfiler')) {
+          console.log('go to user profiler');
           navigationRef.current?.navigate('UserProfile');
         }
       }
     };
 
-    // Ajouter un écouteur pour les liens profonds
-    Linking.addEventListener('url', handleDeepLink);
+    // Add event listener for 'url' event
+    //const unsubscribe =Linking.addEventListener("url", handleDeepLink);
 
-    // Supprimer l'écouteur lors du démontage du composant
+    // Handle deep link if app was opened by a deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    // Remove event listener when component unmounts
     return () => {
-      Linking.removeEventListener('url', handleDeepLink);
+      Linking.removeEventListener("url", unsubscribe);
     };
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <StackNavigator />
     </NavigationContainer>
   );
