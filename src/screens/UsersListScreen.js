@@ -13,20 +13,21 @@ import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
 import { db, auth, getAllUsers } from "../config/firebaseConfig";
 import { onSnapshot, collection, getDocs } from "firebase/firestore";
+import { fetchAllUsers } from "../config/dbCalls";
 
 export default function UsersListScreen() {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersRef = collection(db, "users");
-        const querySnapshot = await getDocs(usersRef);
-
-        const fetchedUsers = querySnapshot.docs.map((doc) => doc.data());
-        setUsers(fetchedUsers);
+        const users = await fetchAllUsers();
+        setUsers(users);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching users:", error);
+        setLoading(false);
       }
     };
 
@@ -36,13 +37,17 @@ export default function UsersListScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <Text style={styles.title}>Liste des utilisateurs</Text>
-      <ScrollView style={styles.usersContainer}>
-        {users.map((user) => (
-          <TouchableOpacity key={user.uid} style={styles.user}>
-            <Text style={styles.userText}>{user.email}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {loading ? (
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      ) : (
+        <ScrollView style={styles.usersContainer}>
+          {users.map((user) => (
+            <TouchableOpacity key={user.uid} style={styles.user}>
+              <Text style={styles.userText}>{user.email}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
     </KeyboardAvoidingView>
   );
 }

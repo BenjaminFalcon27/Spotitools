@@ -11,11 +11,14 @@ import FeedScreen from "../screens/FeedScreen";
 import UsersListScreen from "../screens/UsersListScreen";
 import TopTracksScreen from "../screens/TopTracksScreen";
 import theme from "../config/theme";
+import { auth } from "../config/firebaseConfig";
 
 const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 function Tabs() {
+  const currentUser = auth.currentUser;
+
   return (
     <Tab.Navigator
       activeColor={theme.colors.primary}
@@ -37,12 +40,14 @@ function Tabs() {
       <Tab.Screen
         name="UserProfile"
         component={UserProfileScreen}
+        initialParams={{ user_id: currentUser.uid }}
         options={{
           tabBarLabel: "Profile",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="account" color={color} size={26} />
           ),
         }}
+        key={currentUser.uid}
       />
       <Tab.Screen
         name="UsersList"

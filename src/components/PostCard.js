@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text } from "react-native";
+import { Text, Touchable, TouchableOpacity } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { View } from "react-native";
 import theme from "../config/theme";
 import UpvoteButton from "./Upvote";
 import { auth } from "../config/firebaseConfig";
 import { getDoc } from "@firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 
 const PostCard = ({ post }) => {
   const currentUser = auth.currentUser;
   const authorName = post.userName;
   const textContent = post.textContent;
   const [isAuthorCurrentUser, setIsAuthorCurrentUser] = useState(false);
+  const navigation = useNavigation();
 
   const crownIcon = isAuthorCurrentUser ? (
     <MaterialCommunityIcons
@@ -30,15 +32,27 @@ const PostCard = ({ post }) => {
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
-  }
+  };
 
   fetchIsAuthorCurrentUser();
 
+  const redirectToUserProfile = (event) => {
+    navigation.setParams({ user_id: post.author.id });
+    navigation.navigate("Tabs", {
+      screen: "UserProfile",
+      params: { user_id: post.author.id },
+    });
+  };
+
   return (
     <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{crownIcon} {authorName}</Text>
-      </View>
+      <TouchableOpacity onPress={redirectToUserProfile}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>
+            {crownIcon} {authorName}
+          </Text>
+        </View>
+      </TouchableOpacity>
       <View style={styles.cardContent}>
         <Text style={styles.textContent}>{textContent}</Text>
       </View>

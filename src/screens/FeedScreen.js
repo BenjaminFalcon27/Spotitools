@@ -20,76 +20,42 @@ import {
 } from "firebase/firestore";
 import PostsList from "../components/PostsList";
 import NewPost from "../components/NewPost";
+import { fetchAllPosts } from "../config/dbCalls";
 
 export default function FeedScreen() {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [creatingPost, setCreatingPost] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const postsRef = collection(db, "posts");
-        const querySnapshot = await getDocs(postsRef);
-
-        const fetchedPosts = [];
-        for (const doc of querySnapshot.docs) {
-          const postData = doc.data();
-          const userRef = postData.author;
-          const userEmail = await fetchUserEmail(userRef);
-          const userName = await fetchUserName(userRef);
-          fetchedPosts.push({ ...postData, userEmail, userName }); // Add userEmail to post data
-        }
-        // Sort posts by most recent
-        fetchedPosts.sort((a, b) => b.time - a.time);
-
+        const fetchedPosts = await fetchAllPosts();
         setPosts(fetchedPosts);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching posts:", error);
+        setLoading(false);
       }
     };
 
     fetchPosts();
   }, []);
 
-  const fetchUserEmail = async (userRef) => {
-    try {
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      return userData.email;
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    }
-  };
-
-  const fetchUserName = async (userRef) => {
-    try {
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      return userData.name;
-    } catch (error) {
-      console.errorsetPosts("Error fetching user:", error);
-    }
-  };
-
+  // when a new post is created, fetch all posts again
   const handlePostCreated = () => {
+    if (creatingPost) return;
+
     const fetchPosts = async () => {
       try {
-        const postsRef = collection(db, "posts");
-        const querySnapshot = await getDocs(postsRef);
-
-        const fetchedPosts = [];
-        for (const doc of querySnapshot.docs) {
-          const postData = doc.data();
-          const userRef = postData.author;
-          const userEmail = await fetchUserEmail(userRef);
-          const userName = await fetchUserName(userRef);
-          fetchedPosts.push({ ...postData, userEmail, userName }); // Add userEmail to post data
-        }
-        // Sort posts by most recent
-        fetchedPosts.sort((a, b) => b.time - a.time);
-
+        // we dont want to fetch posts while creating a new post
+        setCreatingPost(true);
+        const fetchedPosts = await fetchAllPosts();
         setPosts(fetchedPosts);
       } catch (error) {
         console.error("Error fetching posts:", error);
+      } finally {
+        setCreatingPost(false);
       }
     };
 
@@ -99,7 +65,7 @@ export default function FeedScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <Text style={styles.title}>Feed</Text>
-      <NewPost onPostCreated={handlePostCreated} />
+      <NewPost onPostCreated={handlePostCreated} disabled={creatingPost} />
       <PostsList posts={posts} />
     </KeyboardAvoidingView>
   );

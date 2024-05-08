@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,68 +12,174 @@ import {
 import theme from "../config/theme";
 import { useNavigation } from "@react-navigation/native";
 import { db, auth } from "../config/firebaseConfig";
+import { collection, doc } from "firebase/firestore";
+import { fetchUserById } from "../config/dbCalls";
 
-export default function UserProfileScreen(user_id) {
+export default function UserProfileScreen(route) {
+  const user_id = route.route.params.user_id;
   const navigation = useNavigation();
   const currentUser = auth.currentUser;
+  const [user, setUser] = useState({});
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
 
   const disconnect = () => {
     auth.signOut();
     navigation.navigate("Login");
   };
 
-  return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <ScrollView style={styles.profileContainer}>
-        <Text style={styles.title}>Mon Profil</Text>
-        <View style={styles.userInfosContainer}>
-          <Text style={styles.infosTitle}>Email:</Text>
-          <Text style={styles.infosText}>{currentUser.email}</Text>
-          {/* if user.token is null */}
-          <Text style={styles.infosTitle}>Token:</Text>
-          <Text style={styles.infosText}>
-            Votre token spotify n'est pas valide
-          </Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Se connecter à Spotify</Text>
-          </TouchableOpacity>
-        </View>
-        <ScrollView style={styles.favoriteContainer}>
-          <Text style={styles.favoriteTitle}>Mes favoris:</Text>
-          <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => addNewFavorite()}
-            >
-              <Text style={styles.buttonText}>Ajouter un favori</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await fetchUserById(route.route.params.user_id);
+        const email = user.email;
+        const name = user.name;
+        setEmail(email);
+        setUser(user);
+        setName(name);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
 
-        <ScrollView style={styles.friendsContainer}>
-          <Text style={styles.friendsTitle}>Mes amis:</Text>
-          <Text style={styles.friendsText}>Aucun ami pour le moment</Text>
-          <View style={styles.buttonContainer}>
+    fetchUser();
+  }, [navigation, user_id, route.route.params.user_id]);
+
+  const isCurrentUserProfile = currentUser.uid === route.route.params.user_id;
+
+  // return (
+  //   <KeyboardAvoidingView style={styles.container} behavior="padding">
+  //     <ScrollView style={styles.profileContainer}>
+  //       <Text style={styles.title}>
+  //         {isCurrentUserProfile ? "Mon Profil" : `Profil de ${name}`}
+  //       </Text>
+  //       <View style={styles.userInfosContainer}>
+  //         <Text style={styles.infosTitle}>Email:</Text>
+  //         <Text style={styles.infosText}>{email}</Text>
+  //         {/* if user.token is null */}
+  //         <Text style={styles.infosTitle}>Token:</Text>
+  //         <Text style={styles.infosText}>Token Spotify non valide</Text>
+  //         <TouchableOpacity style={styles.button}>
+  //           <Text style={styles.buttonText}>Se connecter à Spotify</Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //       {isCurrentUserProfile && (
+  //         <ScrollView style={styles.favoriteContainer}>
+  //           <Text style={styles.favoriteTitle}>Mes favoris:</Text>
+  //           <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
+  //           <View style={styles.buttonContainer}>
+  //             <TouchableOpacity
+  //               style={styles.button}
+  //               onPress={() => addNewFavorite()}
+  //             >
+  //               <Text style={styles.buttonText}>Ajouter un favori</Text>
+  //             </TouchableOpacity>
+  //           </View>
+  //         </ScrollView>
+  //       )}
+
+  //       {isCurrentUserProfile && (
+  //         <ScrollView style={styles.friendsContainer}>
+  //           <Text style={styles.friendsTitle}>Mes amis:</Text>
+  //           <Text style={styles.friendsText}>Aucun ami pour le moment</Text>
+  //           <View style={styles.buttonContainer}>
+  //             <TouchableOpacity
+  //               style={styles.button}
+  //               onPress={() => addNewFriend()}
+  //             >
+  //               <Text style={styles.buttonText}>Ajouter un ami</Text>
+  //             </TouchableOpacity>
+  //           </View>
+  //         </ScrollView>
+  //       )}
+  //       <View style={styles.disconnectButtonContainer}>
+  //         <TouchableOpacity
+  //           style={styles.buttonDisconnect}
+  //           onPress={() => disconnect()}
+  //         >
+  //           <Text style={styles.buttonText}>Se déconnecter</Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </ScrollView>
+  //   </KeyboardAvoidingView>
+  // );
+
+  if (isCurrentUserProfile) {
+    return (
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+        <ScrollView style={styles.profileContainer}>
+          <Text style={styles.title}>Mon Profil</Text>
+          <View style={styles.userInfosContainer}>
+            <Text style={styles.infosTitle}>Email:</Text>
+            <Text style={styles.infosText}>{email}</Text>
+            <Text style={styles.infosTitle}>Token:</Text>
+            <Text style={styles.infosText}>Token Spotify non valide</Text>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>Se connecter à Spotify</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.favoriteContainer}>
+            <Text style={styles.favoriteTitle}>Mes favoris:</Text>
+            <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => addNewFavorite()}
+              >
+                <Text style={styles.buttonText}>Ajouter un favori</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+          <ScrollView style={styles.friendsContainer}>
+            <Text style={styles.friendsTitle}>Mes amis:</Text>
+            <Text style={styles.friendsText}>Aucun ami pour le moment</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => addNewFriend()}
+              >
+                <Text style={styles.buttonText}>Ajouter un ami</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+          <View style={styles.disconnectButtonContainer}>
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => addNewFriend()}
+              style={styles.buttonDisconnect}
+              onPress={() => disconnect()}
             >
-              <Text style={styles.buttonText}>Ajouter un ami</Text>
+              <Text style={styles.buttonText}>Se déconnecter</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
-        <View style={styles.disconnectButtonContainer}>
-          <TouchableOpacity
-            style={styles.buttonDisconnect}
-            onPress={() => disconnect()}
-          >
-            <Text style={styles.buttonText}>Se déconnecter</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+      </KeyboardAvoidingView>
+    );
+  } else {
+    return (
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+        <ScrollView style={styles.profileContainer}>
+          <Text style={styles.title}>{`Profil de ${name}`}</Text>
+          <View style={styles.userInfosContainer}>
+            <Text style={styles.infosTitle}>Email:</Text>
+            <Text style={styles.infosText}>{email}</Text>
+          </View>
+          <ScrollView style={styles.favoriteContainer}>
+            <Text style={styles.favoriteTitle}>Favoris de {name}:</Text>
+            <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
+          </ScrollView>
+          <ScrollView style={styles.backToMyProfileContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                navigation.navigate("UserProfile", { user_id: currentUser.uid })
+              }
+            >
+              <Text style={styles.buttonText}>Retour à mon profil</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
 }
 
 function addNewFavorite() {
@@ -196,5 +302,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: theme.colors.white,
     fontSize: 18,
+  },
+  backToMyProfileContainer: {
+    marginTop: 20,
+    width: "80%",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
 });
