@@ -47,63 +47,6 @@ export default function UserProfileScreen(route) {
 
   const isCurrentUserProfile = currentUser.uid === route.route.params.user_id;
 
-  // return (
-  //   <KeyboardAvoidingView style={styles.container} behavior="padding">
-  //     <ScrollView style={styles.profileContainer}>
-  //       <Text style={styles.title}>
-  //         {isCurrentUserProfile ? "Mon Profil" : `Profil de ${name}`}
-  //       </Text>
-  //       <View style={styles.userInfosContainer}>
-  //         <Text style={styles.infosTitle}>Email:</Text>
-  //         <Text style={styles.infosText}>{email}</Text>
-  //         {/* if user.token is null */}
-  //         <Text style={styles.infosTitle}>Token:</Text>
-  //         <Text style={styles.infosText}>Token Spotify non valide</Text>
-  //         <TouchableOpacity style={styles.button}>
-  //           <Text style={styles.buttonText}>Se connecter à Spotify</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //       {isCurrentUserProfile && (
-  //         <ScrollView style={styles.favoriteContainer}>
-  //           <Text style={styles.favoriteTitle}>Mes favoris:</Text>
-  //           <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
-  //           <View style={styles.buttonContainer}>
-  //             <TouchableOpacity
-  //               style={styles.button}
-  //               onPress={() => addNewFavorite()}
-  //             >
-  //               <Text style={styles.buttonText}>Ajouter un favori</Text>
-  //             </TouchableOpacity>
-  //           </View>
-  //         </ScrollView>
-  //       )}
-
-  //       {isCurrentUserProfile && (
-  //         <ScrollView style={styles.friendsContainer}>
-  //           <Text style={styles.friendsTitle}>Mes amis:</Text>
-  //           <Text style={styles.friendsText}>Aucun ami pour le moment</Text>
-  //           <View style={styles.buttonContainer}>
-  //             <TouchableOpacity
-  //               style={styles.button}
-  //               onPress={() => addNewFriend()}
-  //             >
-  //               <Text style={styles.buttonText}>Ajouter un ami</Text>
-  //             </TouchableOpacity>
-  //           </View>
-  //         </ScrollView>
-  //       )}
-  //       <View style={styles.disconnectButtonContainer}>
-  //         <TouchableOpacity
-  //           style={styles.buttonDisconnect}
-  //           onPress={() => disconnect()}
-  //         >
-  //           <Text style={styles.buttonText}>Se déconnecter</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </ScrollView>
-  //   </KeyboardAvoidingView>
-  // );
-
   if (isCurrentUserProfile) {
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding">
