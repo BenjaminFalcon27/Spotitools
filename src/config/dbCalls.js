@@ -83,3 +83,35 @@ export const fetchAllPosts = async () => {
     throw error;
   }
 }
+
+// Fetch all tracks in Realtime Database
+export const fetchAllTracks = async () => {
+  const tracksRef = child(ref(dbRealtime), "tracks");
+
+  try {
+    const snapshot = await get(tracksRef);
+    if (snapshot.exists()) {
+      const tracks = [];
+      snapshot.forEach((childSnapshot) => {
+        const trackData = childSnapshot.val();
+        if (trackData.items) {
+          trackData.items.forEach((item) => {
+            const track = {
+              name: item.name,
+              artist: item.artists[0].name,
+              previewUrl: item.preview_url,
+            };
+            tracks.push(track);
+          });
+        }
+      });
+      return tracks;
+    } else {
+      console.log("No tracks available");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching tracks:", error);
+    throw error;
+  }
+}

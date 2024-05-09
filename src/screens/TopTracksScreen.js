@@ -10,6 +10,7 @@ import theme from "../config/theme";
 import { dbRealtime } from "../config/firebaseConfig";
 import { ref, get, child } from "firebase/database";
 import { Audio } from "expo-av";
+import { fetchAllTracks } from "../config/dbCalls";
 
 export default function TopTracksScreen() {
   const [trackInfo, setTrackInfo] = useState([]);
@@ -18,41 +19,24 @@ export default function TopTracksScreen() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(null);
 
   useEffect(() => {
-    const tracksRef = child(ref(dbRealtime), "tracks");
-
-    // Fetching data from Firebase
-    get(tracksRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          // Array to store track information
-          const tracks = [];
-          const initialSounds = [];
-          const initialIsPlaying = [];
-          snapshot.forEach((childSnapshot) => {
-            const trackData = childSnapshot.val();
-            if (trackData.items) {
-              trackData.items.forEach((item) => {
-                const track = {
-                  name: item.name,
-                  artist: item.artists[0].name, // Assuming only one artist per track
-                  previewUrl: item.preview_url,
-                };
-                tracks.push(track);
-                initialSounds.push(undefined);
-                initialIsPlaying.push(false);
-              });
-            }
-          });
-          setTrackInfo(tracks);
-          setSounds(initialSounds);
-          setIsPlaying(initialIsPlaying);
-        } else {
-          console.log("No tracks available");
-        }
-      })
-      .catch((error) => {
+    const fetchTracks = async () => {
+      try {
+        const tracks = await fetchAllTracks();
+        const initialSounds = [];
+        const initialIsPlaying = [];
+        tracks.forEach(() => {
+          initialSounds.push(undefined);
+          initialIsPlaying.push(false);
+        });
+        setTrackInfo(tracks);
+        setSounds(initialSounds);
+        setIsPlaying(initialIsPlaying);
+      } catch (error) {
         console.error(error);
-      });
+      }
+    }
+
+    fetchTracks();
   }, []);
 
   useEffect(() => {
