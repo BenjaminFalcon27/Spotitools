@@ -16,17 +16,19 @@ const querystring = require('querystring');
 import 'url-search-params-polyfill';
 import * as Linking from 'expo-linking';
 import base64 from 'react-native-base64';
-
+var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
+var client_secret = '7b3498d6ab3a4da0983d3ce5994e9cc7';
+var token = 'BQBpkxYG4R_2eLWav6p0rq4MG_94QQ5ehi5Q7YcVLI7x_Vm8NEHZ16d8VCHLnZjWTrGwmT5zw8ZBxsFwYJvbKHwEkGDPPPQUQmI3Koy5rESJXSRnoUnAkLvqJmnQchoiqfDNLcWH0NTz-oII296iEMgAJVFw1B-1JwksNRDz8fYYWCljO6bEswQQpEidSG1QhsNw-mBlQltipZIaYWQ53EG5Tg-PczqPpVuFXuUJyQUIe2b7DYhndnNlKEY6TIxx35z7ZZjERcg4oleuZ0Kd4j2fduL1R0zxAshbqA';
+var refresh_token = 'A'
 
 export default function UserProfileScreen(currentUser) {
   const navigation = useNavigation();
   const email = "No email";
   const [isConnected, setIsConnected] = useState(false);
   const buttonText = isConnected ? 'Connected to Spotify!' : 'ajout de mon compte spotify';
-  var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
-  var client_secret = '7b3498d6ab3a4da0983d3ce5994e9cc7';
   var scope = 'user-read-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-follow-modify user-follow-read user-top-read user-library-read user-library-modify user-read-recently-played';
   
+
   const authorizeWithSpotify = async () => {
 
     var redirect_uri = Linking.createURL('/--/spotify-callback'); //'exp://pembne0.anonymous.8081.exp.direct/--/--/spotify-callback';//http://localhost:19000/callback;
@@ -63,7 +65,6 @@ export default function UserProfileScreen(currentUser) {
               'content-type': 'application/x-www-form-urlencoded',
               'Authorization': 'Basic ' + base64.encode(client_id + ':' + client_secret),
             },
-            json: true
           };
 
           console.log("fetch Post");
@@ -77,6 +78,7 @@ export default function UserProfileScreen(currentUser) {
               console.log("Response data:", data);  // Log entire response data
               console.log("Access token:", data.access_token);
               console.log("Refresh token:", data.refresh_token);
+              refresh_token = data.refresh_token;
               setIsConnected(true);
             })
             .catch(error => {
@@ -121,7 +123,7 @@ export default function UserProfileScreen(currentUser) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => addNewFavorite()}
+              onPress={() => get_refresh_token(refresh_token)}
             >
               <Text style={styles.buttonText}>Ajouter un favori</Text>
             </TouchableOpacity>
@@ -166,24 +168,34 @@ function generateRandomString(length) {
   return result;
 }
 
-function connectToSpotify()
-{
-  // Générer un état aléatoire
-  const state = generateRandomString(16);
-  // Définir la portée pour l'autorisation Spotify
-  const scope = 'user-read-private user-read-email';
+function get_refresh_token(refresh_tok) {
+  var authOptions = {
+    url: "https://accounts.spotify.com/api/token",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+      Authorization: "Basic " + base64.encode(client_id + ":" + client_secret),
+    },
+    form: {
+      grant_type: "refresh_token",
+      refresh_token: refresh_tok,
+    },
+  };
 
-  const queryParams = new URLSearchParams({
-    response_type: 'code',
-    client_id: client_id,
-    scope: scope,
-    redirect_uri: redirect_uri,
-    state: state
-  });
-  const authUrl = `https://accounts.spotify.com/authorize?${queryParams.toString()}`;
-
-  // Redirection vers l'URL d'autorisation Spotify avec les paramètres appropriés
-  Linking.openURL(authUrl);
+  console.log("fetch Post with: ", refresh_tok);
+  fetch(authOptions.url, {
+    method: "POST",
+    headers: authOptions.headers,
+    body: querystring.stringify(authOptions.form),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Response data refresh:", data); // Log entire response data
+      console.log("Access token:", data.access_token);
+      console.log("Refresh token:", data.refresh_token);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 function addNewFavorite() {
