@@ -13,7 +13,7 @@
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/material-bottom-tabs": "^6.2.28",
     "@react-navigation/stack": "^6.3.29",
-    "expo": "~50.0.6",
+    "expo": "^51.0.1",
     "expo-av": "~13.10.6",
     "expo-camera": "~14.0.4",
     "expo-linear-gradient": "^12.7.2",
