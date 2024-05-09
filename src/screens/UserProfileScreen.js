@@ -15,7 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 const querystring = require('querystring');
 import 'url-search-params-polyfill';
 import * as Linking from 'expo-linking';
-
+import base64 from 'react-native-base64';
 
 
 export default function UserProfileScreen(currentUser) {
@@ -24,11 +24,13 @@ export default function UserProfileScreen(currentUser) {
   const [isConnected, setIsConnected] = useState(false);
   const buttonText = isConnected ? 'Connected to Spotify!' : 'ajout de mon compte spotify';
   var client_id = '7601ccc32cc449a39a85819a81b1cc4c';
-  var scope = 'user-read-private user-read-email';
+  var client_secret = '7b3498d6ab3a4da0983d3ce5994e9cc7';
+  var scope = 'user-read-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-follow-modify user-follow-read user-top-read user-library-read user-library-modify user-read-recently-played';
   
   const authorizeWithSpotify = async () => {
 
-    var redirect_uri ='exp://pembne0.anonymous.8081.exp.direct/--/--/spotify-callback'; //Linking.makeUrl('/--/spotify-callback');
+    var redirect_uri = Linking.createURL('/--/spotify-callback'); //'exp://pembne0.anonymous.8081.exp.direct/--/--/spotify-callback';//http://localhost:19000/callback;
+    console.log("redirect_uri:", redirect_uri);
     try {
       var state = generateRandomString(16);
       const loginUrl = 'https://accounts.spotify.com/authorize?' +
@@ -41,6 +43,7 @@ export default function UserProfileScreen(currentUser) {
       });
   
       const listener  = Linking.addEventListener("url", ({ url }) => {
+        console.log("URLb:", url);
         if (url.startsWith(redirect_uri)) {
           const urlParams = new URLSearchParams(url.split("?")[1]);
           const code = urlParams.get("code");
@@ -48,12 +51,43 @@ export default function UserProfileScreen(currentUser) {
   
           console.log("Authorization code:", code);
           console.log("State:", state);
-  
-          listener.remove; // Remove listener after handling
-          setIsConnected(true);
+
+          var authOptions = {
+            url: 'https://accounts.spotify.com/api/token',
+            form: {
+              code: code,
+              redirect_uri: redirect_uri,
+              grant_type: 'authorization_code'
+            },
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Basic ' + base64.encode(client_id + ':' + client_secret),
+            },
+            json: true
+          };
+
+          console.log("fetch Post");
+          fetch(authOptions.url, {
+            method: 'POST',
+            headers: authOptions.headers,
+            body: querystring.stringify(authOptions.form)
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log("Response data:", data);  // Log entire response data
+              console.log("Access token:", data.access_token);
+              console.log("Refresh token:", data.refresh_token);
+              setIsConnected(true);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+
+          listener.remove; // Remove listener after handling the URL
         }
       });
-      await WebBrowser.openAuthSessionAsync(loginUrl);
+      console.log("loginUrl:", loginUrl);
+      const ret = await WebBrowser.openAuthSessionAsync(loginUrl);
     } catch (error) {
       console.error('Error:', error);
     }
