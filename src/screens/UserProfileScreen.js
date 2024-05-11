@@ -140,8 +140,11 @@ export default function UserProfileScreen(route) {
             <Text style={styles.infosText}>{email}</Text>
             <Text style={styles.infosTitle}>Token:</Text>
             <Text style={styles.infosText}>Token Spotify non valide</Text>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Se connecter à Spotify</Text>
+            <TouchableOpacity 
+              style={styles.button}
+              onPress={() => get_refresh_token(refresh_token)}
+              >
+              <Text style={styles.buttonText}>refresh mon token</Text>
             </TouchableOpacity>
           </View>
 
@@ -150,20 +153,9 @@ export default function UserProfileScreen(route) {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.button}
-                onPress={authorizeWithSpotify}
+                onPress={() => authorizeWithSpotify()}
               >
                 <Text style={styles.buttonText}>{buttonText}</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-          <ScrollView style={styles.favoriteContainer}>
-            <Text style={styles.favoriteTitle}>refresh token:</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => get_refresh_token(refresh_token)}
-              >
-                <Text style={styles.buttonText}>{"nouveau token"}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -266,7 +258,6 @@ function get_refresh_token(refresh_tok) {
     .then((data) => {
       console.log("Response data refresh:", data); // Log entire response data
       console.log("Access token:", data.access_token);
-      console.log("Refresh token:", data.refresh_token);
     })
     .catch((error) => {
       console.error("Error:", error);
