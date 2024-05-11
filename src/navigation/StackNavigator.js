@@ -87,10 +87,10 @@ const StackNavigator = () => {
     >
       <Stack.Screen name="Splash" component={StartSplashScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="UserProfile" component={UserProfileScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Tabs" component={Tabs} />
-      <Stack.Screen name="UserProfile" component={UserProfileScreen} />
     </Stack.Navigator>
   );
 };
