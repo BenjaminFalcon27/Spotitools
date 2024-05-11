@@ -10,6 +10,9 @@ import theme from "../config/theme";
 import { dbRealtime } from "../config/firebaseConfig";
 import { ref, get, child } from "firebase/database";
 import { Audio } from "expo-av";
+import { fetchAllTracks } from "../config/dbCalls";
+import { Image } from "react-native";
+import PlayButton from "../components/PlayButton";
 
 export default function TopTracksScreen() {
   const [trackInfo, setTrackInfo] = useState([]);
@@ -18,41 +21,24 @@ export default function TopTracksScreen() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(null);
 
   useEffect(() => {
-    const tracksRef = child(ref(dbRealtime), "tracks");
-
-    // Fetching data from Firebase
-    get(tracksRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          // Array to store track information
-          const tracks = [];
-          const initialSounds = [];
-          const initialIsPlaying = [];
-          snapshot.forEach((childSnapshot) => {
-            const trackData = childSnapshot.val();
-            if (trackData.items) {
-              trackData.items.forEach((item) => {
-                const track = {
-                  name: item.name,
-                  artist: item.artists[0].name, // Assuming only one artist per track
-                  previewUrl: item.preview_url,
-                };
-                tracks.push(track);
-                initialSounds.push(undefined);
-                initialIsPlaying.push(false);
-              });
-            }
-          });
-          setTrackInfo(tracks);
-          setSounds(initialSounds);
-          setIsPlaying(initialIsPlaying);
-        } else {
-          console.log("No tracks available");
-        }
-      })
-      .catch((error) => {
+    const fetchTracks = async () => {
+      try {
+        const tracks = await fetchAllTracks();
+        const initialSounds = [];
+        const initialIsPlaying = [];
+        tracks.forEach(() => {
+          initialSounds.push(undefined);
+          initialIsPlaying.push(false);
+        });
+        setTrackInfo(tracks);
+        setSounds(initialSounds);
+        setIsPlaying(initialIsPlaying);
+      } catch (error) {
         console.error(error);
-      });
+      }
+    };
+
+    fetchTracks();
   }, []);
 
   useEffect(() => {
@@ -107,21 +93,38 @@ export default function TopTracksScreen() {
     }
   };
 
+  const playButton = (index) => {
+    return (
+      <PlayButton
+        track={trackInfo[index]}
+        isPlaying={isPlaying[index]}
+        setIsPlaying={() =>
+          handleTogglePlayback(trackInfo[index].previewUrl, index)
+        }
+      />
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       {trackInfo.map((track, index) => (
         <View key={index} style={styles.postContainer}>
+          <View style={styles.coverContainer}>
+            <Image
+              source={{ uri: track.album.images[0].url }}
+              style={styles.cover}
+            />
+          </View>
           <View style={styles.trackInfo}>
             <Text style={styles.user}>{track.name}</Text>
-            <Text style={styles.text}>{track.artist}</Text>
+            <Text style={styles.text}>Artiste: {track.artist}</Text>
+            <Text style={styles.music}>Album: {track.album.name}</Text>
           </View>
           <TouchableOpacity
             onPress={() => handleTogglePlayback(track.previewUrl, index)}
             style={styles.playerContainer}
           >
-            <Text style={styles.playerIcon}>
-              {isPlaying[index] ? "⏸" : "▶️"}
-            </Text>
+            {playButton(index)}
           </TouchableOpacity>
         </View>
       ))}
@@ -161,11 +164,24 @@ const styles = StyleSheet.create({
     color: theme.colors.light,
     fontSize: 14,
   },
-  trackInfo: {
-    flex: 1,
-  },
   playerIcon: {
     fontSize: 24,
     color: "white",
+  },
+  coverContainer: {
+    alignItems: "center",
+    width: "20%",
+  },
+  cover: {
+    width: 75,
+    height: 75,
+  },
+  trackInfo: {
+    width: "50%",
+    marginLeft: "-10",
+  },
+  playerContainer: {
+    width: "20%",
+    alignItems: "center",
   },
 });
