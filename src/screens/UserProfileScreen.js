@@ -18,12 +18,10 @@ import * as Linking from "expo-linking";
 import base64 from "react-native-base64";
 var client_id = "7601ccc32cc449a39a85819a81b1cc4c";
 var client_secret = "7b3498d6ab3a4da0983d3ce5994e9cc7";
-var token =
-  "BQBpkxYG4R_2eLWav6p0rq4MG_94QQ5ehi5Q7YcVLI7x_Vm8NEHZ16d8VCHLnZjWTrGwmT5zw8ZBxsFwYJvbKHwEkGDPPPQUQmI3Koy5rESJXSRnoUnAkLvqJmnQchoiqfDNLcWH0NTz-oII296iEMgAJVFw1B-1JwksNRDz8fYYWCljO6bEswQQpEidSG1QhsNw-mBlQltipZIaYWQ53EG5Tg-PczqPpVuFXuUJyQUIe2b7DYhndnNlKEY6TIxx35z7ZZjERcg4oleuZ0Kd4j2fduL1R0zxAshbqA";
-var refresh_token = "A";
 import { db, auth } from "../config/firebaseConfig";
-import { collection, doc } from "firebase/firestore";
+import { doc, updateDoc, collection } from "firebase/firestore";
 import { fetchUserById } from "../config/dbCalls";
+import { update } from "firebase/database";
 
 export default function UserProfileScreen(route) {
   const user_id = route.route.params.user_id;
@@ -110,11 +108,28 @@ export default function UserProfileScreen(route) {
             body: querystring.stringify(authOptions.form),
           })
             .then((response) => response.json())
-            .then((data) => {
+            .then(async (data) => {
               console.log("Response data:", data); // Log entire response data
               console.log("Access token:", data.access_token);
               console.log("Refresh token:", data.refresh_token);
-              refresh_token = data.refresh_token;
+              try {
+                // Obtenez une référence à l'utilisateur dans la base de données Firestore
+                console.log("user_id:", user_id);
+                const userRef = doc(db, "users", user_id);
+            
+                const newData = {
+                  token: data.access_token,
+                  spotify_refresh_token: data.refresh_token,
+                };
+
+                // Utilisez la méthode update() pour mettre à jour les champs de l'utilisateur
+                await updateDoc(userRef, newData);
+            
+                console.log("User updated successfully");
+              } catch (error) {
+                console.error("Error updating user:", error);
+              }
+              console.log("User updated: ", user);
               setIsConnected(true);
             })
             .catch((error) => {
@@ -139,10 +154,10 @@ export default function UserProfileScreen(route) {
             <Text style={styles.infosTitle}>Email:</Text>
             <Text style={styles.infosText}>{email}</Text>
             <Text style={styles.infosTitle}>Token:</Text>
-            <Text style={styles.infosText}>Token Spotify non valide</Text>
+            <Text style={styles.infosText}>Token Spotify</Text>
             <TouchableOpacity 
               style={styles.button}
-              onPress={() => get_refresh_token(refresh_token)}
+              onPress={() => get_refresh_token(user.spotify_refresh_token || "no token", user_id)}
               >
               <Text style={styles.buttonText}>refresh mon token</Text>
             </TouchableOpacity>
@@ -235,7 +250,13 @@ function generateRandomString(length) {
   return result;
 }
 
-function get_refresh_token(refresh_tok) {
+function get_refresh_token(refresh_tok, user_id) {
+
+  if (refresh_tok == "no token") {
+    console.log("no token");
+    return;
+  }
+
   var authOptions = {
     url: "https://accounts.spotify.com/api/token",
     headers: {
@@ -255,9 +276,25 @@ function get_refresh_token(refresh_tok) {
     body: querystring.stringify(authOptions.form),
   })
     .then((response) => response.json())
-    .then((data) => {
+    .then(async (data) => {
+      try {
+        // Obtenez une référence à l'utilisateur dans la base de données Firestore
+        const userRef = doc(db, "users", user_id);
+    
+        const newData = {
+          token: data.access_token,
+        };
+
+        // Utilisez la méthode update() pour mettre à jour les champs de l'utilisateur
+        console.log("userRef:", userRef);
+        console.log("newData:", newData);
+        await updateDoc(userRef, newData);
+    
+        console.log("User updated successfully");
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
       console.log("Response data refresh:", data); // Log entire response data
-      console.log("Access token:", data.access_token);
     })
     .catch((error) => {
       console.error("Error:", error);
