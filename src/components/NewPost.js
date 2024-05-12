@@ -47,10 +47,11 @@ export default function NewPost(props) {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="What's on your mind?"
+        placeholder="Quoi de neuf ?"
         value={textContent}
         onChangeText={setTextContent}
       />
+      {/* Ici ajouter une musique */}
       <Pressable style={styles.button} onPress={handlePost}>
         <Text style={styles.buttonText}>Post</Text>
       </Pressable>
