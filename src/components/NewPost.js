@@ -88,7 +88,7 @@ const NewPost = (props) => {
       <View style={styles.container}>
         <TextInput
           style={styles.input}
-          placeholder="What's on your mind?"
+          placeholder="Quoi de neuf ?"
           value={textContent}
           onChangeText={setTextContent}
         />

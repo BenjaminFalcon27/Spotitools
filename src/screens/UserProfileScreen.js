@@ -33,6 +33,7 @@ export default function UserProfileScreen(route) {
   const [name, setName] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [favorites, setFavorites] = useState([]);
 
   const disconnect = () => {
     auth.signOut();
@@ -57,6 +58,49 @@ export default function UserProfileScreen(route) {
   }, [navigation, user_id, route.route.params.user_id]);
 
   const isCurrentUserProfile = currentUser.uid === route.route.params.user_id;
+
+  // Remplacer les données factices par les données de l'utilisateur
+  setFavorites([
+    {
+      id: 1,
+      name: "Song 1",
+      artist: "Artist 1",
+      album: "Album 1",
+      cover: "https://i.scdn.co/image/ab67616d0000b273aad7b695784a8dc4342fea8c",
+    },
+    {
+      id: 2,
+      name: "Song 2",
+      artist: "Artist 2",
+      album: "Album 2",
+      cover: "https://i.scdn.co/image/ab67616d0000b273aad7b695784a8dc4342fea8c",
+    },
+    {
+      id: 3,
+      name: "Song 3",
+      artist: "Artist 3",
+      album: "Album 3",
+      cover: "https://i.scdn.co/image/ab67616d0000b273aad7b695784a8dc4342fea8c",
+    },
+  ]);
+
+  const favoriteTracks = favorites.map((favorite) => {
+    return (
+      <View key={favorite.id} style={styles.favorite}>
+        <View style={styles.favoriteTextContainer}>
+          <Text style={styles.favoriteName}>{favorite.name}</Text>
+          <Text style={styles.favoriteArtist}>{favorite.artist}</Text>
+          <Text style={styles.favoriteAlbum}>{favorite.album}</Text>
+        </View>
+        <TouchableOpacity style={styles.favoriteButton}>
+          <Image
+            source={{ uri: favorite.cover }}
+            style={{ width: 100, height: 100 }}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  });
 
   const [isConnected, setIsConnected] = useState(false);
   const buttonText = isConnected
@@ -183,7 +227,9 @@ export default function UserProfileScreen(route) {
             </View>
           </ScrollView>
           <ScrollView style={styles.favoriteContainer}>
-            <Text style={styles.favoriteTitle}>rechercher mon song favori:</Text>
+            <Text style={styles.favoriteTitle}>
+              rechercher mon song favori:
+            </Text>
             <Text style={styles.favoriteText}>
               {" "}
               le meilleur song de tous les temps
@@ -421,6 +467,30 @@ const styles = StyleSheet.create({
     color: theme.colors.light,
     fontSize: 16,
     marginLeft: 10,
+  },
+  favorite: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+  },
+  favoriteTextContainer: {
+    width: "50%",
+  },
+  favoriteName: {
+    color: theme.colors.primary,
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: "bold",
+  },
+  favoriteArtist: {
+    color: theme.colors.light,
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  favoriteAlbum: {
+    color: theme.colors.light,
+    fontSize: 12,
   },
   friendsContainer: {
     marginTop: 20,
