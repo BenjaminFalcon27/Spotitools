@@ -22,6 +22,7 @@ import { db, auth } from "../config/firebaseConfig";
 import { doc, updateDoc, collection } from "firebase/firestore";
 import { fetchUserById } from "../config/dbCalls";
 import { update } from "firebase/database";
+import { Picker } from "@react-native-picker/picker";
 
 export default function UserProfileScreen(route) {
   const user_id = route.route.params.user_id;
@@ -30,6 +31,8 @@ export default function UserProfileScreen(route) {
   const [user, setUser] = useState({});
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const disconnect = () => {
     auth.signOut();
@@ -116,7 +119,7 @@ export default function UserProfileScreen(route) {
                 // Obtenez une référence à l'utilisateur dans la base de données Firestore
                 console.log("user_id:", user_id);
                 const userRef = doc(db, "users", user_id);
-            
+
                 const newData = {
                   token: data.access_token,
                   spotify_refresh_token: data.refresh_token,
@@ -124,7 +127,7 @@ export default function UserProfileScreen(route) {
 
                 // Utilisez la méthode update() pour mettre à jour les champs de l'utilisateur
                 await updateDoc(userRef, newData);
-            
+
                 console.log("User updated successfully");
               } catch (error) {
                 console.error("Error updating user:", error);
@@ -155,10 +158,15 @@ export default function UserProfileScreen(route) {
             <Text style={styles.infosText}>{email}</Text>
             <Text style={styles.infosTitle}>Token:</Text>
             <Text style={styles.infosText}>Token Spotify</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.button}
-              onPress={() => get_refresh_token(user.spotify_refresh_token || "no token", user_id)}
-              >
+              onPress={() =>
+                get_refresh_token(
+                  user.spotify_refresh_token || "no token",
+                  user_id
+                )
+              }
+            >
               <Text style={styles.buttonText}>refresh mon token</Text>
             </TouchableOpacity>
           </View>
@@ -175,15 +183,35 @@ export default function UserProfileScreen(route) {
             </View>
           </ScrollView>
           <ScrollView style={styles.favoriteContainer}>
-            <Text style={styles.favoriteTitle}>Mes favoris:</Text>
-            <Text style={styles.favoriteText}>Aucun favori pour le moment</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => addNewFavorite()}
+            <Text style={styles.favoriteTitle}>rechercher mon song favori:</Text>
+            <Text style={styles.favoriteText}>
+              {" "}
+              le meilleur song de tous les temps
+            </Text>
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholderTextColor={theme.colors.light}
+                placeholder="Search..."
+                onChangeText={(text) =>
+                  searchTracks(user.token || "no token", text, setSearchResults)
+                }
+              />
+              <Picker
+                style={styles.input}
+                selectedValue={selectedItem}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedItem(itemValue)
+                }
               >
-                <Text style={styles.buttonText}>Ajouter un favori</Text>
-              </TouchableOpacity>
+                {searchResults.map((track, index) => (
+                  <Picker.Item
+                    key={index}
+                    label={`${track.name} by ${track.artists[0].name}`}
+                    value={track.id}
+                  />
+                ))}
+              </Picker>
             </View>
           </ScrollView>
           <ScrollView style={styles.friendsContainer}>
@@ -251,7 +279,6 @@ function generateRandomString(length) {
 }
 
 function get_refresh_token(refresh_tok, user_id) {
-
   if (refresh_tok == "no token") {
     console.log("no token");
     return;
@@ -280,7 +307,7 @@ function get_refresh_token(refresh_tok, user_id) {
       try {
         // Obtenez une référence à l'utilisateur dans la base de données Firestore
         const userRef = doc(db, "users", user_id);
-    
+
         const newData = {
           token: data.access_token,
         };
@@ -289,7 +316,7 @@ function get_refresh_token(refresh_tok, user_id) {
         console.log("userRef:", userRef);
         console.log("newData:", newData);
         await updateDoc(userRef, newData);
-    
+
         console.log("User updated successfully");
       } catch (error) {
         console.error("Error updating user:", error);
@@ -299,6 +326,39 @@ function get_refresh_token(refresh_tok, user_id) {
     .catch((error) => {
       console.error("Error:", error);
     });
+}
+
+// Function to search for tracks
+async function searchTracks(tok, searchTerm, setSearchResults) {
+  if (tok == "no token") {
+    console.log("no token");
+    return;
+  }
+  const url = `https://api.spotify.com/v1/search?q=${searchTerm}&type=track`;
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${tok}`,
+      "Content-Type": "application/json",
+    },
+  };
+
+  try {
+    const response = await fetch(url, options);
+    console.log("Response:", response);
+    const data = await response.json();
+    if (data.tracks && data.tracks.items && data.tracks.items.length > 0) {
+      console.log("Found tracks:");
+      data.tracks.items.forEach((track) => {
+        console.log("-", track.name, "by", track.artists[0].name);
+      });
+      setSearchResults(data.tracks.items);
+    } else {
+      console.log("No tracks found for", searchTerm);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 function addNewFavorite() {
@@ -368,6 +428,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
+  },
+  searchInput: {
+    color: theme.colors.white,
+    fontSize: 18,
+    marginBottom: 5,
+    marginTop: 10,
   },
   friendsTitle: {
     color: theme.colors.white,
