@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, Touchable, TouchableOpacity } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-import { View } from "react-native";
+import { View, Image } from "react-native";
 import theme from "../config/theme";
 import UpvoteButton from "./Upvote";
 import { auth } from "../config/firebaseConfig";
@@ -13,6 +13,10 @@ const PostCard = ({ post }) => {
   const currentUser = auth.currentUser;
   const authorName = post.userName;
   const textContent = post.textContent;
+  const albumCoverUrl = post["music"]["albumCoverUrl"]["images"][0]["url"];
+  const musicName = post["music"]["title"];
+  const musicArtist = post["music"]["artist"];
+  console.log(musicName);
   const [isAuthorCurrentUser, setIsAuthorCurrentUser] = useState(false);
   const navigation = useNavigation();
 
@@ -55,6 +59,16 @@ const PostCard = ({ post }) => {
       </TouchableOpacity>
       <View style={styles.cardContent}>
         <Text style={styles.textContent}>{textContent}</Text>
+      </View>
+
+      <View style={styles.cardContent}>
+        <Image
+          source={{ uri: albumCoverUrl }}
+          style={{ width: 100, height: 100 }}
+        />
+        <Text style={styles.textContent}>
+          {musicName} by {musicArtist}
+        </Text>
       </View>
       <View style={styles.cardFooter}>
         <UpvoteButton postId={post.pid} />

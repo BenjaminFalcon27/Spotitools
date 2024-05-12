@@ -72,7 +72,12 @@ export const fetchAllPosts = async () => {
       const userRef = postData.author;
       const userEmail = await fetchUserEmail(userRef);
       const userName = await fetchUserName(userRef);
-      fetchedPosts.push({ ...postData, userEmail, userName }); // Add userEmail to post data
+      if (postData.music !== undefined) {
+        const music = postData.music;
+        fetchedPosts.push({ ...postData, userEmail, userName, music });
+      } else {
+        console.log("No music available");
+      }
     }
     // Sort posts by most recent
     fetchedPosts.sort((a, b) => b.time - a.time);
@@ -101,7 +106,7 @@ export const fetchAllTracks = async () => {
             previewUrl: trackData.preview_url,
             id: trackData.id,
           };
-            
+
           tracks.push(track);
         }
       });
